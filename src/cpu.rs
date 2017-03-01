@@ -200,8 +200,14 @@ impl Cpu {
 				let rand_byte = rand::random::<u8>();
 				self.v[x as usize] = rand_byte & kk;
 			},
+			//DRW Vx, Vy, nibble
 			0xD => {
-				//TODO Graphics stuff
+				for i in 0 .. nibble {
+					let sprite_level = self.ram[i + (self.i as usize)];
+					for j in 0 .. 8 {
+						//TODO
+					}
+				}
 			},
 			//SKP Vx
 			0xE if kk == 0x9E => if self.keys[x as usize] { self.pc += 2 },
