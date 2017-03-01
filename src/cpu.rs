@@ -95,10 +95,10 @@ impl Cpu {
 		let nibble = opcode & 0xF;
 		let x = (opcode & 0xF00) >> 8;
 		let y = (opcode & 0xF0) >> 4;
-		let kk  = (opcode & 0xFF);
+		let kk  = (opcode & 0xFF) as u8;
 		//Match top four bits
 		match (opcode & 0xF000)>>12  {
-			0 => match(opcode) {
+			0 => match opcode {
 				//CLS
 				0x00E0 => {
 					self.draw_flag = true;
@@ -120,10 +120,63 @@ impl Cpu {
 			},
 			3 => {
 				//SE Vx, byte
-				println!("3!");		
+				if self.v[x as usize] == kk {
+					self.pc += 2;
+				}
 			},
-			_ => println!("Sys ADDR, do nothing"),
+			4 => {
+				//SNE Vx, byte
+				if self.v[x as usize] != kk {
+					self.pc += 2;
+				}
+			},
+			5 if nibble == 0 => {
+				//SE Vx, Vy
+				if self.v[x as usize] == self.v[y as usize] {
+					self.pc += 2;
+				}	
+			},
+			//LD Vx, byte
+			6 => self.v[x as usize] = kk,
+			//ADD Vx, byte
+			7 => self.v[x as usize] = self.v[x as usize] + kk,
+			8 => match nibble {
+				//LD Vx, Vy
+				0 => self.v[x as usize] = self.v[y as usize],
+				//OR Vx, Vy
+				1 => self.v[x as usize] = self.v[x as usize] | self.v[y as usize],
+				//AND Vx, Vy
+				2 => self.v[x as usize] = self.v[x as usize] & self.v[y as usize],
+				//XOR Vx, Vy
+				3 => self.v[x as usize] = self.v[x as usize] ^ self.v[y as usize],
+				4 => {
+					//ADD Vx, Vy
+					//Gets a tuple with addition and whether we set the carry flag.
+					let ans = self.v[x as usize].overflowing_add(self.v[y as usize]);
+					self.v[x as usize] = ans.0;
+					self.set_vf(ans.1);
+				},
+				5 => {
+					//SUB Vx, Vy
+					let boolean = self.v[x as usize] > self.v[y as usize];
+					self.set_vf(boolean);
+					self.v[x as usize] -= self.v[y as usize];
+						
+				},
+
+				6 => {
+					//SHR Vx {, Vy}
+					let boolean = self.v[x as usize] & 1 == 1;
+					self.set_vf(boolean);
+					self.v[x as usize] /= 2;
+				}, 
+				7 => self.v[x as usize] = self.v[x as usize] | self.v[y as usize],
+				_ => println!("Unregonised opcode"),
+			},
+			_ => println!("Unregonised opcode"),
 		}
+		
+		//Decrement timers
 		if self.delay_timer > 0{
 			self.delay_timer -= 1;
 		}
@@ -134,6 +187,22 @@ impl Cpu {
 		}
 
 	}
+
+	pub fn set_vf(&mut self, x:bool){
+		if x {
+			self.v[15] = 1u8;
+		}else{
+			self.v[15] = 0u8;
+		}
+		
+	}
+
+	pub fn print_registry(&self) {
+		for i in 0 .. 16 {
+			println!("V[{}] = {}",i, self.v[i]);
+		}
+	}
+	
 	fn get_opcode(&self) -> u16{
 		(self.ram[self.pc as usize] as u16) << 8 | (self.ram[(self.pc as usize) + 1] as u16)
 	}	
