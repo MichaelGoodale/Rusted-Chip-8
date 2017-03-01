@@ -4,7 +4,10 @@ pub struct Cpu {
 	opcode:u16,
 	i:u16,
 	pc:u8,
-
+	
+	stack:[u16;16],
+	sp:u8,
+	
 	delay_timer:u8,
 	sound_timer:u8,
 
@@ -35,12 +38,15 @@ impl Cpu {
 	}
 	
 	pub fn reset(&mut self) {
-		self.ram= [0; 4096];
-		self.v= [0; 16];
-		self.opcode=0;
-		self.i=0;
-		self.pc=0;
+		self.ram = [0; 4096];
+		self.v = [0; 16];
+		self.opcode = 0;
+		self.i = 0;
+		self.pc = 0;
 		
+		self.stack = [0;16]; 
+		self.sp = 0;
+
 		self.delay_timer=0;
 		self.sound_timer=0;
 		for i in 0 .. 80 {
@@ -57,6 +63,9 @@ impl Cpu {
 			opcode: 0,
 			i: 0,
 			pc: 0,
+
+			stack: [0;16],
+			sp: 0,
 
 			delay_timer: 0,
 			sound_timer: 0,
@@ -88,7 +97,19 @@ impl Cpu {
 				self.draw_flag = true;
 				self.gfx = [[false; 32];64];
 			}
+
+				
 			_ => println!("Unrecognised opcode"),
+		}
+		if self.delay_timer > 0{
+			self.delay_timer -= 1;
+		}
+		if self.sound_timer > 0 {
+			if self.sound_timer == 0{
+				//Do audio
+				println!("PRETEND THERE WAS SOUND");
+			}
+			self.sound_timer -= 1;
 		}
 
 	}
