@@ -3,7 +3,7 @@ pub struct Cpu {
 	v:[u8; 16],
 	opcode:u16,
 	i:u16,
-	pc:u8,
+	pc:u16,
 	
 	stack:[u16;16],
 	sp:u8,
@@ -97,7 +97,11 @@ impl Cpu {
 				self.draw_flag = true;
 				self.gfx = [[false; 32];64];
 			}
-
+			//RET
+			0x00EE => {
+				self.pc = self.stack[self.sp as usize];
+				self.sp -= 1;
+			}
 				
 			_ => println!("Unrecognised opcode"),
 		}
@@ -105,10 +109,8 @@ impl Cpu {
 			self.delay_timer -= 1;
 		}
 		if self.sound_timer > 0 {
-			if self.sound_timer == 0{
-				//Do audio
-				println!("PRETEND THERE WAS SOUND");
-			}
+			//Do audio
+			println!("PRETEND THERE WAS SOUND");
 			self.sound_timer -= 1;
 		}
 
