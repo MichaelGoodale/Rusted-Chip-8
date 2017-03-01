@@ -163,16 +163,43 @@ impl Cpu {
 					self.v[x as usize] -= self.v[y as usize];
 						
 				},
-
 				6 => {
 					//SHR Vx {, Vy}
 					let boolean = self.v[x as usize] & 1 == 1;
 					self.set_vf(boolean);
 					self.v[x as usize] /= 2;
 				}, 
-				7 => self.v[x as usize] = self.v[x as usize] | self.v[y as usize],
+				7 => {
+					//SUBN Vx, Vy
+					let boolean = self.v[y as usize] > self.v[x as usize];
+					self.set_vf(boolean);
+					self.v[x as usize] = self.v[y as usize] - self.v[x as usize];
+						
+				},
+				0xE => {
+					//SHR Vx {, Vy}
+					let boolean = self.v[x as usize] & 1 == 1;
+					self.set_vf(boolean);
+					self.v[x as usize] = self.v[x as usize].overflowing_mul(2u8).0;
+				},
 				_ => println!("Unregonised opcode"),
 			},
+			//SNE Vx, Vy
+			9 => if self.v[x as usize] != self.v[y as usize] { self.pc += 2 },
+			//LD i, addr
+			0xA => self.i = addr,
+			//JP V0, addr
+			0xB => self.pc = addr+self.v[0],
+			//RND Vx, byte
+			0xC => {
+				//gen random var in 0..255
+				let rand = 255u8;
+				self.v[x as usize] = rand & kk;
+			}
+			0xD => {
+				//Graphics stuff do later
+			}
+			
 			_ => println!("Unregonised opcode"),
 		}
 		
