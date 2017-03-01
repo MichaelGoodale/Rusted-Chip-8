@@ -7,6 +7,8 @@ pub struct Cpu {
 
 	delay_timer:u8,
 	sound_timer:u8,
+
+	gfx:[[bool;32];64],
 }
 
 impl Cpu {
@@ -43,6 +45,7 @@ impl Cpu {
 		for i in 0 .. 80 {
 			self.ram[i]=Cpu::fonts()[i];
 		}
+		self.gfx = [[false;32];64];
 	}
 
 	pub fn new() -> Cpu {
@@ -55,11 +58,16 @@ impl Cpu {
 
 			delay_timer: 0,
 			sound_timer: 0,
+			gfx: [[false;32];64],
 		};
 		c.reset();
 		c
 	}
-
+	
+	pub fn get_gfx(&self) -> [[bool;32];64]{
+		self.gfx
+	}
+	
 	pub fn print_ram(&self, min:usize, max:usize){
 		for i in min .. max {
 			println!("{}",self.ram[i]);

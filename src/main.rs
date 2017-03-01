@@ -5,7 +5,7 @@ use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::render::Renderer;
 use sdl2::EventPump;
-use sdl2::rect::{Rect};
+use sdl2::rect::Point;
 
 use std::{thread, time};   
 mod cpu;
@@ -16,12 +16,8 @@ const WINDOW_SCALE: u32 = 20;
 
 fn main() {
 	let mut c = cpu::Cpu::new();
-	c.print_ram(0, 100);
-	//graphics_loop();
-}
-
-fn graphics_loop(){
 	let (mut r, mut e) = init_graphics();
+	
 	'event : loop {
 		for event in e.poll_iter() {
 		    match event {
@@ -36,11 +32,21 @@ fn graphics_loop(){
 		}
 
 		//MAIN LOOP IS HERE
-		r.set_draw_color(WHITE);
+		let gfx:[[bool; 32]; 64] = c.get_gfx();
+		r.set_draw_color(BLACK);
 		r.clear();
+		r.set_draw_color(WHITE);
+		for i in 0 .. 64 {
+			for j in 0 .. 32 {
+				if gfx[i][j] {
+					r.draw_point(Point::new(i as i32, j as i32));
+				}
+			}
+		}
 		r.present();
 		thread::sleep(time::Duration::from_millis(10));
 	}
+
 }
 
 fn init_graphics<'a>() -> (Renderer<'a>, EventPump) {
