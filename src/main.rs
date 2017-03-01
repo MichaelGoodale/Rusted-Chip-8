@@ -32,18 +32,20 @@ fn main() {
 		}
 
 		//MAIN LOOP IS HERE
-		let gfx:[[bool; 32]; 64] = c.get_gfx();
-		r.set_draw_color(BLACK);
-		r.clear();
-		r.set_draw_color(WHITE);
-		for i in 0 .. 64 {
-			for j in 0 .. 32 {
-				if gfx[i][j] {
-					r.draw_point(Point::new(i as i32, j as i32));
+		if c.draw_gfx(){
+			let gfx:[[bool; 32]; 64] = c.get_gfx();
+			r.set_draw_color(BLACK);
+			r.clear();
+			r.set_draw_color(WHITE);
+			for i in 0 .. 64 {
+				for j in 0 .. 32 {
+					if gfx[i][j] {
+						r.draw_point(Point::new(i as i32, j as i32));
+					}
 				}
 			}
-		}
-		r.present();
+			r.present();
+		};
 		//Sleep for roughly one second
 		thread::sleep(time::Duration::from_millis(17));
 	}
