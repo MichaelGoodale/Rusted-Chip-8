@@ -1,3 +1,5 @@
+extern crate rand;
+
 pub struct Cpu {
 	ram:[u8; 4096],
 	v:[u8; 16],
@@ -11,6 +13,7 @@ pub struct Cpu {
 	delay_timer:u8,
 	sound_timer:u8,
 
+	keys:[bool; 16],
 	gfx:[[bool;32];64],
 	draw_flag:bool,
 }
@@ -52,6 +55,7 @@ impl Cpu {
 		for i in 0 .. 80 {
 			self.ram[i+0x50]=Cpu::fonts()[i];
 		}
+		self.keys = [false; 16];
 		self.gfx = [[false;32];64];
 		self.draw_flag=false;
 	}
@@ -69,6 +73,7 @@ impl Cpu {
 
 			delay_timer: 0,
 			sound_timer: 0,
+			keys: [false; 16],
 			gfx: [[false;32];64],
 			draw_flag: false,
 		};
@@ -189,16 +194,15 @@ impl Cpu {
 			//LD i, addr
 			0xA => self.i = addr,
 			//JP V0, addr
-			0xB => self.pc = addr+self.v[0],
+			0xB => self.pc = addr+(self.v[0] as u16),
 			//RND Vx, byte
 			0xC => {
-				//gen random var in 0..255
-				let rand = 255u8;
-				self.v[x as usize] = rand & kk;
-			}
+				let rand_byte = rand::random::<u8>();
+				self.v[x as usize] = rand_byte & kk;
+			},
 			0xD => {
-				//Graphics stuff do later
-			}
+				//TODO Graphics stuff
+			},
 			
 			_ => println!("Unregonised opcode"),
 		}
@@ -228,6 +232,14 @@ impl Cpu {
 		for i in 0 .. 16 {
 			println!("V[{}] = {}",i, self.v[i]);
 		}
+	}
+	
+	pub fn press_key(&mut self, key: u16) {
+		self.keys[key as usize] = true;
+	}
+
+	pub fn release_key(&mut self, key: u16) {
+		self.keys[key as usize] = false;
 	}
 	
 	fn get_opcode(&self) -> u16{

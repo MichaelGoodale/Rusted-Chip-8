@@ -5,3 +5,4 @@ authors = ["Michael Goodale <michaelericgoodale@gmail.com>"]
 
 [dependencies]
 sdl2 = "0.29.0"
+rand = "0.3"
