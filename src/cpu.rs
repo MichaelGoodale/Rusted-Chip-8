@@ -91,19 +91,38 @@ impl Cpu {
 	pub fn do_cycle(&mut self){
 		let opcode:u16 = self.get_opcode();
 		self.draw_flag=false;
-		match opcode {
-			//CLS
-			0x00E0 => {
-				self.draw_flag = true;
-				self.gfx = [[false; 32];64];
-			}
-			//RET
-			0x00EE => {
-				self.pc = self.stack[self.sp as usize];
-				self.sp -= 1;
-			}
-				
-			_ => println!("Unrecognised opcode"),
+		let addr = opcode & 0xFFF;
+		let nibble = opcode & 0xF;
+		let x = (opcode & 0xF00) >> 8;
+		let y = (opcode & 0xF0) >> 4;
+		let kk  = (opcode & 0xFF);
+		//Match top four bits
+		match (opcode & 0xF000)>>12  {
+			0 => match(opcode) {
+				//CLS
+				0x00E0 => {
+					self.draw_flag = true;
+					self.gfx = [[false; 32];64];
+				},
+				//RET
+				0x00EE => {
+					self.pc = self.stack[self.sp as usize];
+					self.sp -= 1;
+				},
+				_ => println!("SYS addr, ignoring"), 
+			},
+			1 => self.pc = opcode & 0xFFF, //JP addr
+			2 => {
+				//CALL addr
+				self.sp += 1;
+				self.stack[self.sp as usize] = self.pc;
+				self.pc = opcode & 0xFFF;		
+			},
+			3 => {
+				//SE Vx, byte
+				println!("3!");		
+			},
+			_ => println!("Sys ADDR, do nothing"),
 		}
 		if self.delay_timer > 0{
 			self.delay_timer -= 1;

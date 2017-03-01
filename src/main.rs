@@ -17,7 +17,7 @@ const WINDOW_SCALE: u32 = 20;
 fn main() {
 	let mut c = cpu::Cpu::new();
 	let (mut r, mut e) = init_graphics();
-	
+		
 	'event : loop {
 		for event in e.poll_iter() {
 		    match event {
