@@ -203,8 +203,41 @@ impl Cpu {
 			0xD => {
 				//TODO Graphics stuff
 			},
+			//SKP Vx
+			0xE if kk == 0x9E => if self.keys[x as usize] { self.pc += 2 },
+			//SKNP Vx
+			0xE if kk == 0xA1 => if !self.keys[x as usize] { self.pc += 2 },
 			
-			_ => println!("Unregonised opcode"),
+			0xF => match kk {
+				//LD Vx, DT
+				0x07 => self.v[x as usize] = self.delay_timer,
+				//LD Vx, K
+				0x0A => println!("boo"), //TODO wait until key press
+				//LD DT, Vx
+				0x15 => self.delay_timer = self.v[x as usize],
+				//LD ST, Vx
+				0x18 => self.sound_timer = self.v[x as usize],
+				//ADD I, Vx
+				0x1E => self.i = self.i + (self.v[x as usize] as u16),
+				//LD F, Vx
+				0x29 => println!("boo"), //TODO sprite stuff
+				//LD B, Vx
+				0x33 => println!("boo"), //TODO wait until key press
+				//LD [I], Vx
+				0x55 => {	
+					for i in 0 .. (x as usize) + 1 {
+						self.ram[i + (self.i as usize)] = self.v[i];
+					}
+				},
+				//LD Vx, [I]
+				0x65 => {
+					for i in 0 .. (x as usize) + 1 {
+						self.v[i] = self.ram[i + (self.i as usize)];
+					}
+				},
+				_ => println!("Unrecognised opcode"),
+			},	
+		_ => println!("Unrecognised opcode"),
 		}
 		
 		//Decrement timers
