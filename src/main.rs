@@ -46,7 +46,7 @@ fn main() {
 			}
 			r.present();
 		};
-		//Sleep for roughly one second
+		//Sleep for roughly 1/60 of a second
 		thread::sleep(time::Duration::from_millis(17));
 	}
 

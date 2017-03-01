@@ -44,7 +44,7 @@ impl Cpu {
 		self.delay_timer=0;
 		self.sound_timer=0;
 		for i in 0 .. 80 {
-			self.ram[i]=Cpu::fonts()[i];
+			self.ram[i+0x50]=Cpu::fonts()[i];
 		}
 		self.gfx = [[false;32];64];
 		self.draw_flag=false;
@@ -79,4 +79,20 @@ impl Cpu {
 		}
 	}
 
+	pub fn do_cycle(&mut self){
+		let opcode:u16 = self.get_opcode();
+		self.draw_flag=false;
+		match opcode {
+			//CLS
+			0x00E0 => {
+				self.draw_flag = true;
+				self.gfx = [[false; 32];64];
+			}
+			_ => println!("Unrecognised opcode"),
+		}
+
+	}
+	fn get_opcode(&self) -> u16{
+		(self.ram[self.pc as usize] as u16) << 8 | (self.ram[(self.pc as usize) + 1] as u16)
+	}	
 }
