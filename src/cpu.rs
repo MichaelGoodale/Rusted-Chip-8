@@ -14,7 +14,7 @@ pub struct Cpu {
 	sound_timer:u8,
 
 	keys:[bool; 16],
-	gfx:[[bool;32];64],
+	gfx:[[u8;32];64],
 	draw_flag:bool,
 }
 
@@ -56,7 +56,7 @@ impl Cpu {
 			self.ram[i]=Cpu::fonts()[i];
 		}
 		self.keys = [false; 16];
-		self.gfx = [[false;32];64];
+		self.gfx = [[0;32];64];
 		self.draw_flag=false;
 	}
 
@@ -74,14 +74,14 @@ impl Cpu {
 			delay_timer: 0,
 			sound_timer: 0,
 			keys: [false; 16],
-			gfx: [[false;32];64],
+			gfx: [[0;32];64],
 			draw_flag: false,
 		};
 		c.reset();
 		c
 	}
 	
-	pub fn get_gfx(&self) -> [[bool;32];64]{
+	pub fn get_gfx(&self) -> [[u8;32];64]{
 		self.gfx
 	}
 	pub fn draw_gfx(&self) -> bool {
@@ -107,7 +107,7 @@ impl Cpu {
 				//CLS
 				0x00E0 => {
 					self.draw_flag = true;
-					self.gfx = [[false; 32];64];
+					self.gfx = [[0; 32];64];
 				},
 				//RET
 				0x00EE => {
@@ -206,11 +206,7 @@ impl Cpu {
 				for i in 0 .. nibble {
 					let sprite_level = self.ram[(i + self.i) as usize];
 					for j in 0 .. 8 {
-						if self.gfx[Vx][Vy] {
-							
-						}else{
-						
-						}
+					
 					}
 				}
 			},

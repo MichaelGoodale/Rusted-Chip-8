@@ -33,13 +33,13 @@ fn main() {
 
 		//MAIN LOOP IS HERE
 		if c.draw_gfx(){
-			let gfx:[[bool; 32]; 64] = c.get_gfx();
+			let gfx:[[u8; 32]; 64] = c.get_gfx();
 			r.set_draw_color(BLACK);
 			r.clear();
 			r.set_draw_color(WHITE);
 			for i in 0 .. 64 {
 				for j in 0 .. 32 {
-					if gfx[i][j] {
+					if gfx[i][j]==1 {
 						r.draw_point(Point::new(i as i32, j as i32));
 					}
 				}
