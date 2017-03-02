@@ -53,7 +53,7 @@ impl Cpu {
 		self.delay_timer=0;
 		self.sound_timer=0;
 		for i in 0 .. 80 {
-			self.ram[i+0x50]=Cpu::fonts()[i];
+			self.ram[i]=Cpu::fonts()[i];
 		}
 		self.keys = [false; 16];
 		self.gfx = [[false;32];64];
@@ -202,10 +202,15 @@ impl Cpu {
 			},
 			//DRW Vx, Vy, nibble
 			0xD => {
+				let (Vx, Vy) = [self.v[x as usize], self.v[y as usize]);
 				for i in 0 .. nibble {
 					let sprite_level = self.ram[i + (self.i as usize)];
 					for j in 0 .. 8 {
-						//TODO
+						if(self.gfx[Vx][Vy]){
+							
+						}else{
+						
+						}
 					}
 				}
 			},
@@ -226,25 +231,36 @@ impl Cpu {
 				//ADD I, Vx
 				0x1E => self.i = self.i + (self.v[x as usize] as u16),
 				//LD F, Vx
-				0x29 => println!("boo"), //TODO sprite stuff
+				0x29 => self.i = self.ram[5 * self.v[x as usize] ],//5 since each sprite has a height of 5.
 				//LD B, Vx
-				0x33 => println!("boo"), //TODO wait until key press
+				0x33 => {
+					let mut bcd = self.v[x as usize];
+					//Puts hundreds in ram[i], tens in ram[i+1] etc.
+					for i in (0 .. 3).rev() {
+						self.ram[i + (self.i as usize)] = bcd % 10;
+						bcd /= 10;
+					}
+				},
 				//LD [I], Vx
 				0x55 => {	
 					for i in 0 .. (x as usize) + 1 {
 						self.ram[i + (self.i as usize)] = self.v[i];
 					}
+					self.i = self.i+(x as u8)+1;
 				},
 				//LD Vx, [I]
 				0x65 => {
 					for i in 0 .. (x as usize) + 1 {
 						self.v[i] = self.ram[i + (self.i as usize)];
 					}
+					self.i = self.i+(x as u8)+1;
 				},
 				_ => println!("Unrecognised opcode"),
 			},	
 		_ => println!("Unrecognised opcode"),
 		}
+
+		self.pc += 2;
 		
 		//Decrement timers
 		if self.delay_timer > 0{
