@@ -202,13 +202,21 @@ impl Cpu {
 			},
 			//DRW Vx, Vy, nibble
 			0xD => {
+				self.v[15] = 0; //Set vf
 				let (Vx, Vy) = (self.v[x as usize] as usize, self.v[y as usize] as usize);
-				for i in 0 .. nibble {
-					let sprite_level = self.ram[(i + self.i) as usize];
+				for i in 0 .. nibble as usize {
+					let sprite_level = self.ram[i + (self.i as usize)];
 					for j in 0 .. 8 {
-					
+						//Get the bit for each given pixel.
+						let pixel = (sprite_level >> i) & 1;
+						let set = self.gfx[(Vx+i)%32][(Vy+j) % 64];
+						self.gfx[(Vx+i)%32][(Vy+j) % 64] ^= pixel;
+						if set == 1 && self.gfx[(Vx+i)%32][(Vy+j) % 64] == 0 {
+							self.v[15]=1;
+						}
 					}
 				}
+				self.draw_flag = true;
 			},
 			//SKP Vx
 			0xE if kk == 0x9E => if self.keys[x as usize] { self.pc += 2 },
