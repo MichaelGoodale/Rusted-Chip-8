@@ -47,7 +47,7 @@ impl Cpu {
 	pub fn load_rom(&mut self, game: &str){
 		self.reset();
 		//LOAD ROM
-		let path = Path::new(//);
+		let path = Path::new("/home/michael/rust_projects/chip8_emu/assets/MERLIN");
 
 		let display = path.display();
 		let mut file = match File::open(&path) {
@@ -167,7 +167,7 @@ impl Cpu {
 			//LD Vx, byte
 			6 => self.v[x as usize] = kk,
 			//ADD Vx, byte
-			7 => self.v[x as usize] = self.v[x as usize] + kk,
+			7 => self.v[x as usize] = self.v[x as usize].overflowing_add(kk).0,
 			8 => match nibble {
 				//LD Vx, Vy
 				0 => self.v[x as usize] = self.v[y as usize],
