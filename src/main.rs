@@ -16,7 +16,7 @@ const WINDOW_SCALE: u32 = 20;
 
 fn main() {
 	let mut c = cpu::Cpu::new();
-	c.load_rom();
+	c.load_rom("PONG");
 	let (mut r, mut e) = init_graphics();
 		
 	'event : loop {

@@ -1,6 +1,9 @@
 extern crate rand;
 use std::fs::File;
-use std::io::Read;
+use std::env::current_dir;
+use std::path::Path;
+use std::error::Error;
+use std::io::prelude::*;
 
 pub struct Cpu {
 	ram:[u8; 4096],
@@ -41,15 +44,23 @@ impl Cpu {
 		  0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 		]
 	}
-	pub fn load_rom(&mut self){
+	pub fn load_rom(&mut self, game: &str){
 		self.reset();
 		//LOAD ROM
-		self.ram[0x200] = 0x62;
-		self.ram[0x201] = 0x02;
-		self.ram[0x202] = 0xF2;
-		self.ram[0x203] = 0x29;
-		self.ram[0x204] = 0xD1;
-		self.ram[0x205] = 0x15;	
+		let path = Path::new(//);
+
+		let display = path.display();
+		let mut file = match File::open(&path) {
+			Err(why) => panic!("couldn't open {}: {}", display,
+								   why.description()),
+			Ok(file) => file,
+		};
+		let mut ram_ptr = 0x200;
+		for byte in file.bytes() {
+			self.ram[ram_ptr] = byte.unwrap();
+			ram_ptr+=1;
+		}
+		
 	}	
 	pub fn reset(&mut self) {
 		self.ram = [0; 4096];
