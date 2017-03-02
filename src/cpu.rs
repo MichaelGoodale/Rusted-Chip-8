@@ -47,7 +47,7 @@ impl Cpu {
 	pub fn load_rom(&mut self, game: &str){
 		self.reset();
 		//LOAD ROM
-		let path = Path::new("/home/michael/rust_projects/chip8_emu/assets/MERLIN");
+		let path = Path::new("/home/michael/rust_projects/chip8_emu/assets/CONNECT4");
 
 		let display = path.display();
 		let mut file = match File::open(&path) {
@@ -318,7 +318,12 @@ impl Cpu {
 			println!("V[{}] = {}",i, self.v[i]);
 		}
 	}
-	
+	pub fn do_opcode(&mut self, opcode: u16) {
+		println!("{:X} + {:X} = {:X}", ((opcode & 0xFF00) >> 8),opcode & 0xFF, opcode);
+		self.ram[(self.pc+1) as usize] = (opcode & 0xFF) as u8;
+		self.ram[self.pc as usize] = ((opcode & 0xFF00) >> 8) as u8;
+		self.do_cycle();
+	}	
 	pub fn press_key(&mut self, key: u16) {
 		self.keys[key as usize] = true;
 	}

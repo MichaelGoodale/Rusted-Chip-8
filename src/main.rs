@@ -16,7 +16,7 @@ const WINDOW_SCALE: u32 = 20;
 
 fn main() {
 	let mut c = cpu::Cpu::new();
-	c.load_rom("PONG");
+	//c.load_rom("PONG");
 	let (mut r, mut e) = init_graphics();
 		
 	'event : loop {
@@ -31,7 +31,10 @@ fn main() {
 			_ => continue
 		    }
 		}
-		c.do_cycle();
+		c.do_opcode(0x00E0);
+		c.do_opcode(0xC10F);
+		c.do_opcode(0xF129);
+		c.do_opcode(0xD005);
 		//MAIN LOOP IS HERE
 		if c.draw_gfx(){
 			let gfx:[[u8; 32]; 64] = c.get_gfx();
@@ -48,7 +51,7 @@ fn main() {
 			r.present();
 		};
 		//Sleep for roughly 1/60 of a second
-		thread::sleep(time::Duration::from_millis(17));
+		thread::sleep(time::Duration::from_millis(100));//17));
 	}
 
 }
