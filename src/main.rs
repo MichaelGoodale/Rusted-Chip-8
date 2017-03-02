@@ -16,6 +16,7 @@ const WINDOW_SCALE: u32 = 20;
 
 fn main() {
 	let mut c = cpu::Cpu::new();
+	c.load_rom();
 	let (mut r, mut e) = init_graphics();
 		
 	'event : loop {
@@ -30,7 +31,7 @@ fn main() {
 			_ => continue
 		    }
 		}
-
+		c.do_cycle();
 		//MAIN LOOP IS HERE
 		if c.draw_gfx(){
 			let gfx:[[u8; 32]; 64] = c.get_gfx();

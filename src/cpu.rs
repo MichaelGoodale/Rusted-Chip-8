@@ -1,4 +1,6 @@
 extern crate rand;
+use std::fs::File;
+use std::io::Read;
 
 pub struct Cpu {
 	ram:[u8; 4096],
@@ -39,13 +41,22 @@ impl Cpu {
 		  0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 		]
 	}
-	
+	pub fn load_rom(&mut self){
+		self.reset();
+		//LOAD ROM
+		self.ram[0x200] = 0x62;
+		self.ram[0x201] = 0x02;
+		self.ram[0x202] = 0xF2;
+		self.ram[0x203] = 0x29;
+		self.ram[0x204] = 0xD1;
+		self.ram[0x205] = 0x15;	
+	}	
 	pub fn reset(&mut self) {
 		self.ram = [0; 4096];
 		self.v = [0; 16];
 		self.opcode = 0;
 		self.i = 0;
-		self.pc = 0;
+		self.pc = 0x200;
 		
 		self.stack = [0;16]; 
 		self.sp = 0;
@@ -66,7 +77,7 @@ impl Cpu {
 			v: [0; 16],
 			opcode: 0,
 			i: 0,
-			pc: 0,
+			pc: 0x200,
 
 			stack: [0;16],
 			sp: 0,
@@ -95,6 +106,7 @@ impl Cpu {
 
 	pub fn do_cycle(&mut self){
 		let opcode:u16 = self.get_opcode();
+		println!("Opcode is {:X}, at pc={:X}, with i = {:X}",opcode, self.pc, self.i);
 		self.draw_flag=false;
 		let addr = opcode & 0xFFF;
 		let nibble = opcode & 0xF;
@@ -206,15 +218,18 @@ impl Cpu {
 				let (Vx, Vy) = (self.v[x as usize] as usize, self.v[y as usize] as usize);
 				for i in 0 .. nibble as usize {
 					let sprite_level = self.ram[i + (self.i as usize)];
+					print!("Sprite level {} is {:X}", i, sprite_level);
 					for j in 0 .. 8 {
 						//Get the bit for each given pixel.
-						let pixel = (sprite_level >> i) & 1;
-						let set = self.gfx[(Vx+i)%32][(Vy+j) % 64];
-						self.gfx[(Vx+i)%32][(Vy+j) % 64] ^= pixel;
-						if set == 1 && self.gfx[(Vx+i)%32][(Vy+j) % 64] == 0 {
+						let pixel = (sprite_level >> (7-j)) & 1;
+						let set = self.gfx[(Vx+j)%64][(Vy+i) % 32];
+						self.gfx[(Vx+j)%64][(Vy+i) % 32] ^= pixel;
+						if set == 1 && self.gfx[(Vx+j)%64][(Vy+i) % 32] == 0 {
 							self.v[15]=1;
 						}
+						print!("{}", pixel);
 					}
+					println!("");
 				}
 				self.draw_flag = true;
 			},
@@ -235,7 +250,7 @@ impl Cpu {
 				//ADD I, Vx
 				0x1E => self.i = self.i + (self.v[x as usize] as u16),
 				//LD F, Vx
-				0x29 => self.i = self.ram[(5 * self.v[x as usize]) as usize] as u16,//5 since each sprite has a height of 5.
+				0x29 => self.i = 5 * self.v[x as usize] as u16,//5 since each sprite has a height of 5.
 				//LD B, Vx
 				0x33 => {
 					let mut bcd = self.v[x as usize];
