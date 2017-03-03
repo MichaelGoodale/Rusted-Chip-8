@@ -112,7 +112,6 @@ impl Cpu {
 
 	pub fn do_cycle(&mut self){
 		let opcode:u16 = self.get_opcode();
-		self.print_registry();
 		self.draw_flag=false;
 		let addr = opcode & 0xFFF;
 		let nibble = opcode & 0xF;
@@ -319,7 +318,7 @@ impl Cpu {
 		self.do_cycle();
 	}
 	pub fn print_state(&self){
-		println!("Opcode is {:X}, at pc={:X}, with i = {:X}",opcode, self.pc, self.i);
+		println!("Opcode is {:X}, at pc={:X}, with i = {:X}",self.get_opcode(), self.pc, self.i);
 		self.print_registry();
 	}
 		
