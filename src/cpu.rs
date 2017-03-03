@@ -44,10 +44,10 @@ impl Cpu {
 		  0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 		]
 	}
-	pub fn load_rom(&mut self, game: &str){
+	pub fn load_rom(&mut self){
 		self.reset();
 		//LOAD ROM
-		let path = Path::new("/home/michael/rust_projects/chip8_emu/assets/CONNECT4");
+		let path = Path::new("/home/michael/rust_projects/chip8_emu/assets/PONG2");
 
 		let display = path.display();
 		let mut file = match File::open(&path) {
@@ -118,6 +118,7 @@ impl Cpu {
 	pub fn do_cycle(&mut self){
 		let opcode:u16 = self.get_opcode();
 		println!("Opcode is {:X}, at pc={:X}, with i = {:X}",opcode, self.pc, self.i);
+		self.print_registry();
 		self.draw_flag=false;
 		let addr = opcode & 0xFFF;
 		let nibble = opcode & 0xF;
@@ -125,6 +126,7 @@ impl Cpu {
 		let y = (opcode & 0xF0) >> 4;
 		let kk  = (opcode & 0xFF) as u8;
 		//Match top four bits
+		self.pc += 2;
 		match (opcode & 0xF000)>>12  {
 			0 => match opcode {
 				//CLS
@@ -139,12 +141,12 @@ impl Cpu {
 				},
 				_ => println!("SYS addr, ignoring"), 
 			},
-			1 => self.pc = opcode & 0xFFF, //JP addr
+			1 => self.pc = addr, //JP addr
 			2 => {
 				//CALL addr
 				self.sp += 1;
 				self.stack[self.sp as usize] = self.pc;
-				self.pc = opcode & 0xFFF;		
+				self.pc = addr;		
 			},
 			3 => {
 				//SE Vx, byte
@@ -229,7 +231,6 @@ impl Cpu {
 				let (Vx, Vy) = (self.v[x as usize] as usize, self.v[y as usize] as usize);
 				for i in 0 .. nibble as usize {
 					let sprite_level = self.ram[i + (self.i as usize)];
-					print!("Sprite level {} is {:X}", i, sprite_level);
 					for j in 0 .. 8 {
 						//Get the bit for each given pixel.
 						let pixel = (sprite_level >> (7-j)) & 1;
@@ -238,9 +239,7 @@ impl Cpu {
 						if set == 1 && self.gfx[(Vx+j)%64][(Vy+i) % 32] == 0 {
 							self.v[15]=1;
 						}
-						print!("{}", pixel);
 					}
-					println!("");
 				}
 				self.draw_flag = true;
 			},
@@ -290,7 +289,6 @@ impl Cpu {
 		_ => println!("Unrecognised opcode"),
 		}
 
-		self.pc += 2;
 		
 		//Decrement timers
 		if self.delay_timer > 0{
@@ -314,12 +312,14 @@ impl Cpu {
 	}
 
 	pub fn print_registry(&self) {
-		for i in 0 .. 16 {
-			println!("V[{}] = {}",i, self.v[i]);
+		for i in 0 .. 4 {
+			for j in 0 .. 4 {
+				print!("V[{}]:{}|",i*4 + j, self.v[i*4 +j]);
+			}
+			print!("\n");
 		}
 	}
 	pub fn do_opcode(&mut self, opcode: u16) {
-		println!("{:X} + {:X} = {:X}", ((opcode & 0xFF00) >> 8),opcode & 0xFF, opcode);
 		self.ram[(self.pc+1) as usize] = (opcode & 0xFF) as u8;
 		self.ram[self.pc as usize] = ((opcode & 0xFF00) >> 8) as u8;
 		self.do_cycle();

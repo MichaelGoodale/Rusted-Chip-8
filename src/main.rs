@@ -18,7 +18,7 @@ fn main() {
 	let mut c = cpu::Cpu::new();
 	//c.load_rom("PONG");
 	let (mut r, mut e) = init_graphics();
-		
+	c.load_rom();
 	'event : loop {
 		for event in e.poll_iter() {
 		    match event {
@@ -31,10 +31,13 @@ fn main() {
 			_ => continue
 		    }
 		}
+		c.do_cycle();
+		/*
 		c.do_opcode(0x00E0);
 		c.do_opcode(0xC10F);
 		c.do_opcode(0xF129);
 		c.do_opcode(0xD005);
+		*/
 		//MAIN LOOP IS HERE
 		if c.draw_gfx(){
 			let gfx:[[u8; 32]; 64] = c.get_gfx();
@@ -51,7 +54,7 @@ fn main() {
 			r.present();
 		};
 		//Sleep for roughly 1/60 of a second
-		thread::sleep(time::Duration::from_millis(100));//17));
+		thread::sleep(time::Duration::from_millis(17));//17));
 	}
 
 }
