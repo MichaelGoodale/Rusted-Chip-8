@@ -47,7 +47,7 @@ impl Cpu {
 	pub fn load_rom(&mut self){
 		self.reset();
 		//LOAD ROM
-		let path = Path::new("/home/michael/rust_projects/chip8_emu/assets/PONG2");
+		let path = Path::new("/home/michael/rust_projects/chip8_emu/assets/INVADERS");
 
 		let display = path.display();
 		let mut file = match File::open(&path) {
@@ -109,15 +109,9 @@ impl Cpu {
 	pub fn draw_gfx(&self) -> bool {
 		self.draw_flag	
 	}	
-	pub fn print_ram(&self, min:usize, max:usize){
-		for i in min .. max {
-			println!("{}",self.ram[i]);
-		}
-	}
 
 	pub fn do_cycle(&mut self){
 		let opcode:u16 = self.get_opcode();
-		println!("Opcode is {:X}, at pc={:X}, with i = {:X}",opcode, self.pc, self.i);
 		self.print_registry();
 		self.draw_flag=false;
 		let addr = opcode & 0xFFF;
@@ -311,7 +305,7 @@ impl Cpu {
 		
 	}
 
-	pub fn print_registry(&self) {
+	fn print_registry(&self) {
 		for i in 0 .. 4 {
 			for j in 0 .. 4 {
 				print!("V[{}]:{}|",i*4 + j, self.v[i*4 +j]);
@@ -323,7 +317,12 @@ impl Cpu {
 		self.ram[(self.pc+1) as usize] = (opcode & 0xFF) as u8;
 		self.ram[self.pc as usize] = ((opcode & 0xFF00) >> 8) as u8;
 		self.do_cycle();
-	}	
+	}
+	pub fn print_state(&self){
+		println!("Opcode is {:X}, at pc={:X}, with i = {:X}",opcode, self.pc, self.i);
+		self.print_registry();
+	}
+		
 	pub fn press_key(&mut self, key: u16) {
 		self.keys[key as usize] = true;
 	}
