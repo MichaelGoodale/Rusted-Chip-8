@@ -112,7 +112,6 @@ impl Cpu {
 
 	pub fn do_cycle(&mut self) -> bool{
 		let opcode:u16 = self.get_opcode();
-		self.print_keys();
 		self.draw_flag=false;
 		let addr = opcode & 0xFFF;
 		let nibble = opcode & 0xF;
@@ -239,9 +238,9 @@ impl Cpu {
 			},
 			0xE => match kk{
 				//SKP Vx
-				0x9E => if self.keys[x as usize] { self.pc += 2 },
+				0x9E => if self.keys[self.v[x as usize] as usize] { self.pc += 2 },
 				//SKNP Vx
-				0xA1 => if !self.keys[x as usize] { self.pc += 2 },
+				0xA1 => if !self.keys[self.v[x as usize] as usize] { self.pc += 2 },
 				_ => println!("Unrecognised opcode"),
 			},
 			0xF => match kk {
