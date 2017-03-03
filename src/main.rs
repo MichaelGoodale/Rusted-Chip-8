@@ -7,7 +7,7 @@ use sdl2::render::Renderer;
 use sdl2::EventPump;
 use sdl2::rect::Point;
 
-use std::{thread, time};   
+use std::{thread, time, env};   
 mod cpu;
 
 const WHITE:Color = Color::RGB(255, 255, 255);
@@ -15,10 +15,13 @@ const BLACK:Color = Color::RGB(0, 0, 0);
 const WINDOW_SCALE: u32 = 20;
 
 fn main() {
+	let args: Vec<_> = env::args().collect();
+	if args.len() <= 1 {
+		println!("You must give a game name!");
+	}
 	let mut c = cpu::Cpu::new();
-	//c.load_rom("PONG");
 	let (mut r, mut e) = init_graphics();
-	c.load_rom("PONG");
+	c.load_rom(&args[1].to_string());
 	'event : loop {
 		for event in e.poll_iter() {
 		    match event {
