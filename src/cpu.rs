@@ -44,10 +44,11 @@ impl Cpu {
 		  0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 		]
 	}
-	pub fn load_rom(&mut self){
+	pub fn load_rom(&mut self, game: &str){
 		self.reset();
 		//LOAD ROM
-		let path = Path::new("/home/michael/rust_projects/chip8_emu/assets/PONG");
+		let path_str = "/home/michael/rust_projects/chip8_emu/assets/".to_string()+game;
+		let path = Path::new(&path_str);
 
 		let display = path.display();
 		let mut file = match File::open(&path) {

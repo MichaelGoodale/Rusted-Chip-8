@@ -18,7 +18,7 @@ fn main() {
 	let mut c = cpu::Cpu::new();
 	//c.load_rom("PONG");
 	let (mut r, mut e) = init_graphics();
-	c.load_rom();
+	c.load_rom("PONG");
 	'event : loop {
 		for event in e.poll_iter() {
 		    match event {
@@ -81,7 +81,7 @@ fn main() {
 			r.present();
 		};
 		//Sleep for roughly 1/60 of a second
-		thread::sleep(time::Duration::from_millis(1));//17));
+		thread::sleep(time::Duration::from_millis(17));//17));
 	}
 
 }
