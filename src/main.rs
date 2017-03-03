@@ -24,21 +24,48 @@ fn main() {
 		    match event {
 			Event::Quit{..} => break 'event,
 			Event::KeyDown {keycode: Some(keycode), ..} => {
-			    if keycode == Keycode::Escape {
-				break 'event
-			    }
-			}
+				if keycode == Keycode::Escape {
+					break 'event
+				}else{
+					let (key_num, valid_key) = match_key(keycode);
+					if valid_key {
+						c.press_key(key_num);
+					}else{
+						continue;
+					}
+				}
+			},
+			Event::KeyUp {keycode : Some(keycode), ..} => {
+				let (key_num, valid_key) = match_key(keycode);
+				if valid_key {
+					c.release_key(key_num);
+				}else{
+					continue;
+				}
+			},
 			_ => continue
 		    }
 		}
-		c.do_cycle();
-		/*
-		c.do_opcode(0x00E0);
-		c.do_opcode(0xC10F);
-		c.do_opcode(0xF129);
-		c.do_opcode(0xD005);
-		*/
-		//MAIN LOOP IS HERE
+		if(c.do_cycle()) {
+			'inputwait: for key in e.wait_iter(){
+				match key {
+					Event::Quit{..} => break 'event,
+					Event::KeyDown {keycode: Some(keycode), ..} => {
+						if keycode == Keycode::Escape {
+							break 'event
+						}else{
+							let (key_num, valid_key) = match_key(keycode);
+							if valid_key {
+								c.press_key(key_num);
+							}else{
+								continue;
+							}
+						}
+					}
+					_ => continue
+				}
+			}
+		}
 		if c.draw_gfx(){
 			let gfx:[[u8; 32]; 64] = c.get_gfx();
 			r.set_draw_color(BLACK);
@@ -79,3 +106,25 @@ fn init_graphics<'a>() -> (Renderer<'a>, EventPump) {
 	(renderer, events)
 }
 
+fn match_key(key: Keycode) -> (u8, bool) {
+	match key {
+		Keycode::Num1 => (0x1, true),
+		Keycode::Num2 => (0x2, true),
+		Keycode::Num3 => (0x3, true),
+		Keycode::Num4 => (0xC, true),
+		Keycode::Q => (0x4, true),
+		Keycode::W => (0x5, true),
+		Keycode::E => (0x6, true),
+		Keycode::R => (0xD, true),
+		Keycode::A => (0x7, true),
+		Keycode::S => (0x8, true),
+		Keycode::D => (0x9, true),
+		Keycode::F => (0xE, true),
+		Keycode::Z => (0xA, true),
+		Keycode::X => (0x0, true),
+		Keycode::C => (0xB, true),
+		Keycode::V => (0xF, true),
+		_ => (0, false),
+
+	}
+}

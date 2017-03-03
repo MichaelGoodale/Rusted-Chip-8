@@ -47,7 +47,7 @@ impl Cpu {
 	pub fn load_rom(&mut self){
 		self.reset();
 		//LOAD ROM
-		let path = Path::new("/home/michael/rust_projects/chip8_emu/assets/INVADERS");
+		let path = Path::new("/home/michael/rust_projects/chip8_emu/assets/PONG");
 
 		let display = path.display();
 		let mut file = match File::open(&path) {
@@ -110,8 +110,9 @@ impl Cpu {
 		self.draw_flag	
 	}	
 
-	pub fn do_cycle(&mut self){
+	pub fn do_cycle(&mut self) -> bool{
 		let opcode:u16 = self.get_opcode();
+		self.print_keys();
 		self.draw_flag=false;
 		let addr = opcode & 0xFFF;
 		let nibble = opcode & 0xF;
@@ -183,7 +184,7 @@ impl Cpu {
 					//SUB Vx, Vy
 					let boolean = self.v[x as usize] > self.v[y as usize];
 					self.set_vf(boolean);
-					self.v[x as usize] -= self.v[y as usize];
+					self.v[x as usize] = self.v[x as usize].overflowing_sub(self.v[y as usize]).0;
 						
 				},
 				6 => {
@@ -236,16 +237,18 @@ impl Cpu {
 				}
 				self.draw_flag = true;
 			},
-			//SKP Vx
-			0xE if kk == 0x9E => if self.keys[x as usize] { self.pc += 2 },
-			//SKNP Vx
-			0xE if kk == 0xA1 => if !self.keys[x as usize] { self.pc += 2 },
-			
+			0xE => match kk{
+				//SKP Vx
+				0x9E => if self.keys[x as usize] { self.pc += 2 },
+				//SKNP Vx
+				0xA1 => if !self.keys[x as usize] { self.pc += 2 },
+				_ => println!("Unrecognised opcode"),
+			},
 			0xF => match kk {
 				//LD Vx, DT
 				0x07 => self.v[x as usize] = self.delay_timer,
 				//LD Vx, K
-				0x0A => println!("boo"), //TODO wait until key press
+				0x0A => return true, //TODO wait until key press
 				//LD DT, Vx
 				0x15 => self.delay_timer = self.v[x as usize],
 				//LD ST, Vx
@@ -292,7 +295,7 @@ impl Cpu {
 			println!("PRETEND THERE WAS SOUND");
 			self.sound_timer -= 1;
 		}
-
+		false
 	}
 
 	pub fn set_vf(&mut self, x:bool){
@@ -312,6 +315,13 @@ impl Cpu {
 			print!("\n");
 		}
 	}
+	fn print_keys(&self) {
+		print!("These keys pressed: ");
+		for i in 0 .. 16 {
+			if self.keys[i] {print!("{},",i)};
+		}
+		print!("\n");
+	}
 	pub fn do_opcode(&mut self, opcode: u16) {
 		self.ram[(self.pc+1) as usize] = (opcode & 0xFF) as u8;
 		self.ram[self.pc as usize] = ((opcode & 0xFF00) >> 8) as u8;
@@ -320,13 +330,14 @@ impl Cpu {
 	pub fn print_state(&self){
 		println!("Opcode is {:X}, at pc={:X}, with i = {:X}",self.get_opcode(), self.pc, self.i);
 		self.print_registry();
+		self.print_keys();
 	}
 		
-	pub fn press_key(&mut self, key: u16) {
+	pub fn press_key(&mut self, key: u8) {
 		self.keys[key as usize] = true;
 	}
 
-	pub fn release_key(&mut self, key: u16) {
+	pub fn release_key(&mut self, key: u8) {
 		self.keys[key as usize] = false;
 	}
 	
