@@ -60,6 +60,7 @@ fn main() {
 							let (key_num, valid_key) = match_key(keycode);
 							if valid_key {
 								c.press_key(key_num);
+								break 'inputwait;
 							}else{
 								continue;
 							}
@@ -84,7 +85,7 @@ fn main() {
 			r.present();
 		};
 		//Sleep for roughly 1/60 of a second
-		thread::sleep(time::Duration::from_millis(17));//17));
+		thread::sleep(time::Duration::from_millis(1));//17));
 	}
 
 }
