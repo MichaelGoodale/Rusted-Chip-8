@@ -60,12 +60,21 @@ fn main() {
 							let (key_num, valid_key) = match_key(keycode);
 							if valid_key {
 								c.press_key(key_num);
-								break 'inputwait;
+								c.print_state();
+								break 'inputwait
 							}else{
 								continue;
 							}
 						}
-					}
+					},
+					Event::KeyUp {keycode : Some(keycode), ..} => {
+						let (key_num, valid_key) = match_key(keycode);
+						if valid_key {
+							c.release_key(key_num);
+						}else{
+							continue;
+						}
+					},
 					_ => continue
 				}
 			}
